@@ -7,14 +7,20 @@ import (
 )
 
 func main() {
-	ppl := []string{"Vader", "Luke", "Leia", "Han", "Palpatine", "Chewie", "C3PO"}
+	// List of participants
+	participants := []string{"Vader", "Luke", "Leia", "Han", "Palpatine", "Chewie", "C3PO"}
+
+	// Forbidden pairs
 	noGifts := map[string]map[string]bool{
 		"Palpatine": {"Vader": true, "Luke": true},
 		"Chewie":    {"Palpatine": true},
 	}
 
+	// Seed the random number generator
 	rand.Seed(time.Now().UnixNano())
-	result, err := secretSanta(ppl, noGifts)
+
+	// Generate Secret Santa pairs with forbidden pairs consideration
+	result, err := secretSantaWithRestrictions(participants, noGifts)
 	if err != nil {
 		fmt.Println("No solution found.")
 	} else {
@@ -24,10 +30,14 @@ func main() {
 	}
 }
 
-func secretSanta(ppl []string, noGifts map[string]map[string]bool) ([][]string, error) {
+// secretSantaWithRestrictions generates Secret Santa pairs with forbidden pairs consideration.
+func secretSantaWithRestrictions(participants []string, noGifts map[string]map[string]bool) ([][]string, error) {
 	for attempts := 0; attempts < 1000; attempts++ {
-		shuffled := shuffle(ppl)
+		// Shuffle the participants
+		shuffled := shuffle(participants)
 		valid := true
+
+		// Check for valid pairs
 		for i, giver := range shuffled {
 			receiver := shuffled[(i+1)%len(shuffled)]
 			if giver == receiver || noGifts[giver][receiver] {
@@ -35,6 +45,8 @@ func secretSanta(ppl []string, noGifts map[string]map[string]bool) ([][]string, 
 				break
 			}
 		}
+
+		// If all pairs are valid, return the result
 		if valid {
 			pairs := make([][]string, len(shuffled))
 			for i, giver := range shuffled {
@@ -44,9 +56,12 @@ func secretSanta(ppl []string, noGifts map[string]map[string]bool) ([][]string, 
 			return pairs, nil
 		}
 	}
+
+	// If no valid solution is found after a number of attempts, return an error
 	return nil, fmt.Errorf("no valid solution found")
 }
 
+// shuffle randomly shuffles a slice of strings.
 func shuffle(slice []string) []string {
 	shuffled := make([]string, len(slice))
 	copy(shuffled, slice)
